@@ -1,16 +1,17 @@
 import streamlit as st
 import pandas as pd
 import datetime
-from google.auth.credentials import AnonymousCredentials
-from google.cloud import firestore as client_firestore
+import firebase_admin
+from firebase_admin import firestore
 import random
 import time
 
 # -------------------------------
 # 🔹 Firestore 초기화
 # -------------------------------
-project_id = "cai-care-app"
-db = client_firestore.Client(project=project_id, credentials=AnonymousCredentials())
+if not firebase_admin._apps:
+    firebase_admin.initialize_app()
+db = firestore.client()
 
 # -------------------------------
 # 🔹 기본 설정
@@ -157,7 +158,7 @@ elif st.session_state.page == "home":
         st.rerun()
 
 # -------------------------------
-# 🔹 기록 화면 (접질림/삐끗 여부 추가됨)
+# 🔹 기록 화면 (접질림/삐끗 여부 포함)
 # -------------------------------
 elif st.session_state.page == "record":
     st.title("✍️ 오늘 발목 기록하기")
@@ -173,8 +174,6 @@ elif st.session_state.page == "record":
         activity = st.slider("오늘 활동 수준", 0, 10, existing_record["activity"] if existing_record else 5)
         balance = st.radio("균형감/불안정감 인지", ["없음", "있음"],
                            index=["없음", "있음"].index(existing_record["balance"]) if existing_record else 0)
-        
-        # ✅ 접질림/삐끗 여부 추가
         sprain = st.radio("오늘 접질림/삐끗 여부", ["없음", "있음"],
                           index=["없음", "있음"].index(existing_record["sprain"]) if existing_record and "sprain" in existing_record else 0)
 
@@ -206,7 +205,7 @@ elif st.session_state.page == "record":
                 "pain": pain,
                 "activity": activity,
                 "balance": balance,
-                "sprain": sprain,  # ✅ 추가된 부분
+                "sprain": sprain,
                 "management": ", ".join(management),
                 "shoe": shoe,
                 "surface": surface
@@ -253,5 +252,6 @@ elif st.session_state.page == "record":
     if st.button("🏠 홈으로 돌아가기"):
         st.session_state.page = "home"
         st.rerun()
+
 
 
