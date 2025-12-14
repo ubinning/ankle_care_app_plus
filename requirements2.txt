@@ -1,5 +1,1 @@
-streamlit
-pandas
-google-cloud-firestore
-firebase-admin
-google-auth
+
